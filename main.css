@@ -1,64 +1,178 @@
+* {
+	box-sizing: border-box;
+}
+
 /* define some global values */
 :root {
-    color-scheme: light dark;
+	color-scheme: light dark;
 
-    --system-color-blue: rgba(0,122,255,1);
-    --system-color-gray: rgba(142,142,147,1);
-    --system-color-light: rgba(255,255,255,1);
-    --system-color-text: rgba(0,0,0,1);
-    --system-color-button: #337751;
+	--system-color-blue: rgba(0,122,255,1);
+	--system-color-gray: rgba(142,142,147,1);
+	--system-color-light: rgba(255,255,255,1);
+	--system-color-text: rgba(0,0,0,1);
+	--system-color-button: #337751;
 }
 
 html {
-    font: 100%/1.45 system-ui, Helvetica, Arial, sans-serif;
-    background-color: var(--system-color-gray);
-    color: var(--system-color-text);
+	font: 100%/1.45 system-ui, Helvetica, Arial, sans-serif;
+	background-color: var(--system-color-gray);
+	color: var(--system-color-text);
 }
 
 .hidden {
-    display: none;
+	display: none;
 }
 
 #bubbles {
-    background-color: var(--system-color-light);
-    color: var(--system-color-text);
-    padding: 1rem 1.5rem;
-    max-width: 65ch;
-    border-radius: 0.25rem;
-    font-size: 1.4rem;
+	background-color: var(--system-color-light);
+	color: var(--system-color-text);
+	padding: 1rem 1.5rem;
+	max-width: 65ch;
+	border-radius: 0.25rem;
+	font-size: 1.4rem;
 }
 
 #bubbles:empty {
-    display: none;
+	display: none;
 }
 
 #bubbles > div {
-    margin-bottom: 0.5em;
+	margin-bottom: 0.5em;
 }
 
 #bubbles button {
-    font-size: 1em;
-    border: 0;
-    padding: 0.2em 0.5em 0.3em;
-    background: var(--system-color-button);
-    color: var(--system-color-text);
+	font-size: 1em;
+	border: 0;
+	padding: 0.2em 0.5em 0.3em;
+	background: var(--system-color-button);
+	color: var(--system-color-text);
 }
 
 #bubbles button.next {
 
 }
 
+/* begin dragula styles */
+.gu-mirror {
+	position: fixed !important;
+	margin: 0 !important;
+	z-index: 9999 !important;
+	opacity: 0.8;
+}
+
+.gu-hide {
+	display: none !important;
+}
+
+.gu-unselectable {
+	-webkit-user-select: none !important;
+	-moz-user-select: none !important;
+	-ms-user-select: none !important;
+	user-select: none !important;
+}
+
+.gu-transit {
+	opacity: 0.2;
+}
+/* end dragula styles */
+
+#inventory {
+	background: black;
+	width: 200px;
+	padding: 0.5rem;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-rows: repeat(3, 1fr);
+	grid-column-gap: 0.5rem;
+	grid-row-gap: 0.5rem;
+}
+
+#inventory > div {
+	border: 1px solid #f0f;
+	font-size: 0.8rem;
+	width: 100%;
+	min-height: 5rem;
+}
+
+#inventory > div.highlight-target {
+	border-color: yellow;
+}
+
+#inventory > div.highlight-drop {
+	border-color: green;
+}
+
+#inventory > div.full {
+	background: gray;
+}
+
+#inventory #inv-head { grid-area: 1 / 2; }
+#inventory #inv-head::before { content: 'Head'; }
+
+#inventory #inv-body { grid-area: 2 / 2; }
+#inventory #inv-body::before { content: 'Body'; }
+
+#inventory #inv-pants { grid-area: 3 / 2; }
+#inventory #inv-pants::before { content: 'Legs'; }
+
+#inventory #inv-hand-right { grid-area: 2 / 1; }
+#inventory #inv-hand-right::before { content: 'Hand R'; }
+
+#inventory #inv-hand-left { grid-area: 2 / 3; }
+#inventory #inv-hand-left::before { content: 'Hand L'; }
+
+#inventory #inv-accessory-right { grid-area: 3 / 1; }
+#inventory #inv-accessory-right::before { content: 'Arm R'; }
+
+#inventory #inv-accessory-left { grid-area: 3 / 3; }
+#inventory #inv-accessory-left::before { content: 'Arm L'; }
+
+#inventory #inv-accessory-neck { grid-area: 1 / 3; }
+#inventory #inv-accessory-neck::before { content: 'Neck'; }
+
+#inventory .item,
+#lootbox .item,
+.item.gu-mirror {
+	font-size: 0.8rem;
+	border: 1px solid green;
+	overflow: hidden;
+}
+
+#inventory .item h2,
+#lootbox .item h2,
+.item.gu-mirror h2 {
+	font-size: 1em;
+	margin: 0;
+}
+
+#lootbox {
+	width: 200px;
+	padding: 0.5rem;
+	background: red;
+	min-height: 2rem;
+
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	/* grid-template-rows: repeat(4, 1fr); */
+	grid-column-gap: 0.5rem;
+	grid-row-gap: 0.5rem;
+}
+
+#lootbox .item {
+	
+}
+
 @media (prefers-color-scheme: light) {
-    /* do things in light mode */
+	/* do things in light mode */
 }
 
 @media (prefers-color-scheme: dark) {
-    /* set different color values for dark mode */
-    :root {
-        --system-color-blue: rgba(10,132,255,1);
-        --system-color-gray: rgba(142,142,147,1);
-        --system-color-light: rgba(0,0,0,1);
-        --system-color-text: rgba(255,255,255,1);
-        /* --system-color-button: rgba(0,0,0,1); */
-    }
+	/* set different color values for dark mode */
+	:root {
+		--system-color-blue: rgba(10,132,255,1);
+		--system-color-gray: rgba(142,142,147,1);
+		--system-color-light: rgba(0,0,0,1);
+		--system-color-text: rgba(255,255,255,1);
+		/* --system-color-button: rgba(0,0,0,1); */
+	}
 }

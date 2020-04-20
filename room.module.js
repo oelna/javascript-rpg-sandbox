@@ -9,6 +9,7 @@ const ROOM = class {
 		Object.assign(this.attributes, {
             'setting': 'dungeon',
 			'difficulty': 1,
+			'visited': false,
 			'requires': []
         }, attributes);
 
@@ -18,6 +19,14 @@ const ROOM = class {
             'left': null,
             'right': null
         }, connections);
+	}
+
+	enter() {
+		console.log();
+	}
+
+	leave() {
+		console.log('You hasten your pace to get out of this place');
 	}
 
 	/*

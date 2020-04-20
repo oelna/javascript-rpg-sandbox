@@ -1,0 +1,64 @@
+/* define some global values */
+:root {
+    color-scheme: light dark;
+
+    --system-color-blue: rgba(0,122,255,1);
+    --system-color-gray: rgba(142,142,147,1);
+    --system-color-light: rgba(255,255,255,1);
+    --system-color-text: rgba(0,0,0,1);
+    --system-color-button: #337751;
+}
+
+html {
+    font: 100%/1.45 system-ui, Helvetica, Arial, sans-serif;
+    background-color: var(--system-color-gray);
+    color: var(--system-color-text);
+}
+
+.hidden {
+    display: none;
+}
+
+#bubbles {
+    background-color: var(--system-color-light);
+    color: var(--system-color-text);
+    padding: 1rem 1.5rem;
+    max-width: 65ch;
+    border-radius: 0.25rem;
+    font-size: 1.4rem;
+}
+
+#bubbles:empty {
+    display: none;
+}
+
+#bubbles > div {
+    margin-bottom: 0.5em;
+}
+
+#bubbles button {
+    font-size: 1em;
+    border: 0;
+    padding: 0.2em 0.5em 0.3em;
+    background: var(--system-color-button);
+    color: var(--system-color-text);
+}
+
+#bubbles button.next {
+
+}
+
+@media (prefers-color-scheme: light) {
+    /* do things in light mode */
+}
+
+@media (prefers-color-scheme: dark) {
+    /* set different color values for dark mode */
+    :root {
+        --system-color-blue: rgba(10,132,255,1);
+        --system-color-gray: rgba(142,142,147,1);
+        --system-color-light: rgba(0,0,0,1);
+        --system-color-text: rgba(255,255,255,1);
+        /* --system-color-button: rgba(0,0,0,1); */
+    }
+}

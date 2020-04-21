@@ -34,6 +34,142 @@ game.init = function () {
 				'resCold': 0,
 				'resPoison': 0
 			}
+		}),
+		'inventory': new Vue({
+			'el': '#inventory-container',
+			'data': {
+				'show': true,
+				'drake': null, /* dragula instance */
+				'containerEl': null,
+				'lootboxEl': null,
+				'lootboxItems': [],
+				'inventoryEl': null,
+				'inventorySlots': []
+			},
+			'watch': {
+				'inventorySlots': function () {
+					console.warn('inventory slots changed');
+				}
+			},
+			'created': function () {
+				/*
+				console.log(this.containerEl);
+				dragula({
+					'containers': this.$el.querySelector('#lootbox'),
+					'revertOnSpill': true
+				});
+				*/
+			},
+			'mounted': function () {
+				const self = this;
+				this.containerEl = this.$el;
+				this.lootboxEl = this.$el.querySelector('#lootbox');
+				this.inventoryEl = this.$el.querySelector('#inventory');
+				this.inventorySlots = Array.from(this.inventoryEl.querySelectorAll('.slot'));
+
+				const dragContainers = this.inventorySlots.concat([this.lootboxEl]);
+
+				this.drake = dragula({
+					'containers': dragContainers,
+					'revertOnSpill': true,
+					'accepts': function (el, target, source, sibling) {
+						const sourceType = el.getAttribute('data-type');
+						const targetType = target.getAttribute('data-accept');
+
+						const targetLimit = target.getAttribute('data-limit');
+						const targetOccupied = target.querySelectorAll('.item:not(.gu-transit)');
+
+						if (targetLimit > targetOccupied.length) {
+							if (targetType.toLowerCase() == 'all') {
+								// accept all types
+								return true;
+							} else {
+								// check type requirement
+								return sourceType == targetType;
+							}
+						} else {
+							// spot is full
+							return false;
+						}
+					}
+				});
+
+				this.drake.on('over', function (el, container, source) {
+					container.classList.add('highlight-drop');
+				});
+
+				this.drake.on('out', function (el, container, source) {
+					container.classList.remove('highlight-drop');
+				});
+
+				this.drake.on('drag', function (el, source) {
+					if (!el.targets) {
+						const sourceType = el.getAttribute('data-type');
+						el.targets = self.inventoryEl.querySelectorAll('div[data-accept="'+sourceType+'"]:not(.full)');
+					}
+
+					el.targets.forEach(function (e, i) {
+						e.classList.add('highlight-target');
+					});
+				});
+
+				this.drake.on('dragend', function (el, container, source) {
+					if (el.targets) {
+						el.targets.forEach(function (e, i) {
+							e.classList.remove('highlight-target');
+						});
+					}
+				});
+
+				this.drake.on('drop', function (el, container, source) {
+
+					let isInventory = false;
+					
+					// messy matching
+					if (container.getAttribute('id').startsWith('inv') && self.inventoryEl.getAttribute('id').startsWith('inv')) {
+						isInventory = true;
+					}
+
+					const occupancy = container.querySelectorAll('.item');
+					if (container.getAttribute('data-limit') == occupancy.length) {
+						container.classList.add('full');
+					}
+
+					if (source.querySelectorAll('*').length == 0) {
+						console.log('container is now empty again');
+						source.classList.remove('full');
+					}
+
+					// click removal of equipped items
+					if (isInventory) {
+						el.addEventListener('click', function (event) {
+
+							const slot = this.closest('.slot');
+
+							// remove the item from the inventory
+							self.lootboxEl.appendChild(this);
+
+							// update slot full status
+							if (slot) {
+								const slotOccupancy = slot.querySelectorAll('.item').length;
+								if (slotOccupancy < parseInt(slot.getAttribute('data-limit'))) {
+									slot.classList.remove('full');
+								}
+							}
+
+							const changeEvent = new CustomEvent('inventoryChange');
+							self.inventoryEl.dispatchEvent(changeEvent);
+
+							console.log('unequipped item');
+						});
+					}
+
+					const changeEvent = new CustomEvent('inventoryChange');
+					self.inventoryEl.dispatchEvent(changeEvent);
+
+					console.log('dropped item', el);
+				});
+			}
 		})
 	}
 
@@ -49,7 +185,7 @@ game.init = function () {
 
 		let item = new ITEM();
 		item.rerollStats();
-		console.log(item);
+		// console.log(item);
 	}
 
 	game.RANDOM = new RANDOM();
@@ -77,112 +213,6 @@ game.init = function () {
 	console.log(warrior.name, warrior.attributes);
 	console.log('coin toss', game.RANDOM.bool());
 	// console.log(game.TITLES.generateTitle());
-
-	
-	const inventorySlots = Array.from(game.elements.inventory.querySelectorAll('.slot'));
-	const lootbox = [game.elements.lootbox];
-	const dragContainers = inventorySlots.concat(lootbox);
-
-	game.drake = dragula({
-		'containers': dragContainers,
-		'revertOnSpill': true,
-		'accepts': function (el, target, source, sibling) {
-			const sourceType = el.getAttribute('data-type');
-			const targetType = target.getAttribute('data-accept');
-
-			const targetLimit = target.getAttribute('data-limit');
-			const targetOccupied = target.querySelectorAll('.item:not(.gu-transit)');
-
-			if (targetLimit > targetOccupied.length) {
-				if (targetType.toLowerCase() == 'all') {
-					// accept all types
-					// console.log('this spot accepts all types.');
-					return true;
-				} else {
-					// check type requirement
-					// console.log('type requirements', sourceType, targetType, target);
-					return sourceType == targetType;
-				}
-			} else {
-				// spot is full
-				console.log('spot is full!', targetOccupied.length, targetLimit);
-				return false;
-			}
-		}
-	});
-
-	game.drake.on('over', function (el, container, source) {
-		container.classList.add('highlight-drop');
-	});
-
-	game.drake.on('out', function (el, container, source) {
-		container.classList.remove('highlight-drop');
-	});
-
-	game.drake.on('drag', function (el, source) {
-		if (!el.targets) {
-			const sourceType = el.getAttribute('data-type');
-			el.targets = game.elements.inventory.querySelectorAll('div[data-accept="'+sourceType+'"]:not(.full)');
-		}
-
-		el.targets.forEach(function (e, i) {
-			e.classList.add('highlight-target');
-		});
-	});
-
-	game.drake.on('dragend', function (el, container, source) {
-		if (el.targets) {
-			el.targets.forEach(function (e, i) {
-				e.classList.remove('highlight-target');
-			});
-		}
-	});
-
-	game.drake.on('drop', function (el, container, source) {
-		const occupancy = container.querySelectorAll('.item');
-		if (container.getAttribute('data-limit') == occupancy.length) {
-			container.classList.add('full');
-		}
-
-		if (source.querySelectorAll('*').length == 0) {
-			console.log('container is now empty again');
-			source.classList.remove('full');
-		}
-
-		var event = new CustomEvent('inventoryChange');
-		game.elements.inventory.dispatchEvent(event);
-
-		console.log('dropped item', el);
-	});
-
-	// global listener for inventory item removal via click
-	document.addEventListener('click', function (event) {
-		const item = event.target.closest('.item');
-		if (item) {
-			if (item.matches('#inventory .item')) { /* magic number, err, string! */
-				
-				const slot = item.closest('.slot');
-
-				// remove the item from the inventory
-				game.elements.lootbox.appendChild(item);
-
-				// update slot full status
-				if (slot) {
-					const slotOccupancy = slot.querySelectorAll('.item').length;
-					if (slotOccupancy < parseInt(slot.getAttribute('data-limit'))) {
-						slot.classList.remove('full');
-					}
-				}
-
-				var event = new CustomEvent('inventoryChange');
-				game.elements.inventory.dispatchEvent(event);
-
-				console.log('unequipped item');
-			}
-			
-		}
-		
-	});
 
 	game.elements.inventory.addEventListener('inventoryChange', function (event) {
 		console.log('inventory content changed!');

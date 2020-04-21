@@ -96,6 +96,13 @@ html {
 }
 /* end dragula styles */
 
+#inventory-container {
+	width: 100%;
+	background: #bbb;
+	padding: 1rem;
+	display: flex;
+}
+
 #inventory {
 	background: black;
 	width: 350px;

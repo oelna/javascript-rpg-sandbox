@@ -17,6 +17,26 @@ game.init = function () {
 		'lootbox': document.querySelector('#lootbox')
 	}
 
+	game.character = {
+		'stats': new Vue({
+			'el': '#character-stats',
+			'data': {
+				'strength': 3,
+				'constitution': 3,
+				'dexterity': 3,
+				'intelligence': 3,
+				'wisdom': 3,
+				'charisma': 3,
+				'maxMana': 10,
+				'maxHealth': 10,
+				'resLightning': 0,
+				'resFire': 0,
+				'resCold': 0,
+				'resPoison': 0
+			}
+		})
+	}
+
 	let warrior = new CHARACTER('Hector', {
 		'strength': 10,
 		'charisma': 5,
@@ -166,6 +186,8 @@ game.init = function () {
 
 	game.elements.inventory.addEventListener('inventoryChange', function (event) {
 		console.log('inventory content changed!');
+		game.character.stats.maxHealth += 2;
+		game.character.stats.strength += 3;
 	});
 
 

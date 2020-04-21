@@ -52,6 +52,26 @@ html {
 
 }
 
+#character-stats {
+	width: 350px;
+	background: #000;
+	padding: 0.5rem;
+	display: flex;
+	flex-flow: row wrap;
+}
+
+#character-stats dt,
+#character-stats dd {
+	width: 50%;
+	margin: 0;
+	padding: 0.25em 0;
+	border-top: 1px solid #fff;
+}
+
+#character-stats dd {
+	text-align: right;	
+}
+
 /* begin dragula styles */
 .gu-mirror {
 	position: fixed !important;
@@ -78,7 +98,7 @@ html {
 
 #inventory {
 	background: black;
-	width: 200px;
+	width: 350px;
 	padding: 0.5rem;
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -146,7 +166,7 @@ html {
 }
 
 #lootbox {
-	width: 200px;
+	width: 350px;
 	padding: 0.5rem;
 	background: red;
 	min-height: 2rem;

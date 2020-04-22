@@ -1,6 +1,6 @@
 const TITLES = class {
-	constructor() {
-		this.titles = {
+	constructor(titles) {
+		this.titles = titles || {
 			'type': ['Temple', 'Prison', 'House', 'Mansion', 'Dungeon', 'World', 'Castle', 'Graveyard', 'Library', 'Visage', 'Monument', 'Sin', 'Rise'],
 			'descriptor': ['Void', 'Blood', 'Burnt', 'Undead', 'Frozen', 'Night', 'Drowned', 'Moonlight', 'Sun', 'Poisoned', 'Invisible', 'Ancient'],
 			'actor': ['Queen', 'Prince', 'King', 'Elder', 'Scholar', 'Statue', 'Serpent', 'Slave Master', 'Lord', 'Lady', 'Demon', 'Caretaker'],

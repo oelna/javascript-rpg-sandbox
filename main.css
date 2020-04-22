@@ -139,8 +139,8 @@ html {
 #inventory #inv-body { grid-area: 2 / 2; }
 #inventory #inv-body::before { content: 'Body'; }
 
-#inventory #inv-pants { grid-area: 3 / 2; }
-#inventory #inv-pants::before { content: 'Legs'; }
+#inventory #inv-legs { grid-area: 3 / 2; }
+#inventory #inv-legs::before { content: 'Legs'; }
 
 #inventory #inv-hand-right { grid-area: 2 / 1; }
 #inventory #inv-hand-right::before { content: 'Hand R'; }

@@ -17,6 +17,59 @@ game.init = function () {
 		'lootbox': document.querySelector('#lootbox')
 	}
 
+	// generate 7 items, as a demo
+	let randomItems = [];
+	for (var i = 0; i < 7; i++) {
+
+		let item = new ITEM();
+		item.rerollStats();
+		randomItems.push(item);
+		// console.log(item);
+	}
+
+	Vue.component('inventory-slot', {
+		'data': function () {
+			return {
+				'count': 0
+			}
+		},
+		'props': ['items'],
+		'methods': {
+			'isFull': function () {
+				return false;
+			},
+			'dragStart': function () {
+				return false;
+			},
+			'dragEnd': function () {
+				return false;
+			},
+			'dragAdd': function () {
+				return false;
+			},
+			'inventorySlotOptions': function () {
+				return {
+					'group': {
+						'name': 'inventory',
+						'put': function (to, from, item, event) {
+							// limit the amount of items in a slot
+							if (to.options.dataLimit <= to.el.querySelectorAll('.item').length) {
+								return false;
+							}
+							// limit to item type as well
+							if (to.options.dataAccept !== item.getAttribute('data-type')) {
+								return false;
+							}
+							
+							return true;
+						}
+					}
+				}
+			}
+		},
+		'template': '<draggable class="slot" id="inv-hand-right" data-accept="hand" data-limit="1" v-model="items.items" v-bind="inventorySlotOptions()" :class="(isFull(items)) ? \'full\' : \'\'" @start="dragStart" @end="dragEnd" @add="dragAdd"><div>x</div></draggable>'
+	});
+
 	game.character = {
 		'stats': new Vue({
 			'el': '#character-stats',
@@ -39,136 +92,130 @@ game.init = function () {
 			'el': '#inventory-container',
 			'data': {
 				'show': true,
-				'drake': null, /* dragula instance */
 				'containerEl': null,
 				'lootboxEl': null,
-				'lootboxItems': [],
+				'lootboxItems': randomItems,
 				'inventoryEl': null,
-				'inventorySlots': []
+				'inventorySlots': [],
+				'inventoryItems': {
+					'head': {
+						'limit': 1,
+						'items': []
+					},
+					'body': {
+						'limit': 1,
+						'items': []
+					},
+					'legs': {
+						'limit': 1,
+						'items': []
+					},
+					'handRight': {
+						'limit': 1,
+						'items': []
+					},
+					'handLeft': {
+						'limit': 1,
+						'items': []
+					},
+					'accessoryRight': {
+						'limit': 1,
+						'items': []
+					},
+					'accessoryLeft': {
+						'limit': 1,
+						'items': []
+					},
+					'accessoryNeck': {
+						'limit': 1,
+						'items': []
+					},
+				}
 			},
 			'watch': {
-				'inventorySlots': function () {
-					console.warn('inventory slots changed');
+				'inventoryItems': function () {
+					console.warn('inventory items changed');
 				}
 			},
 			'created': function () {
-				/*
-				console.log(this.containerEl);
-				dragula({
-					'containers': this.$el.querySelector('#lootbox'),
-					'revertOnSpill': true
-				});
-				*/
+
+			},
+			'methods': {
+				'inventorySlotOptions': function () {
+					return {
+						'group': {
+							'name': 'inventory',
+							'put': function (to, from, item, event) {
+								// limit the amount of items in a slot
+								if (to.options.dataLimit <= to.el.querySelectorAll('.item').length) {
+									return false;
+								}
+								// limit to item type as well
+								if (to.options.dataAccept !== item.getAttribute('data-type')) {
+									return false;
+								}
+								
+								return true;
+							}
+						}
+					}
+				},
+				'isFull': function (container) {
+					return container.items.length >= container.limit;
+				},
+				'dragStart': function (event) {
+					if (!event.item.targets) {
+						const sourceType = event.item.getAttribute('data-type');
+						event.item.targets = this.inventoryEl.querySelectorAll('div[data-accept="'+sourceType+'"]'); // :not(.full)
+					}
+
+					event.item.targets.forEach(function (e, i) {
+						e.classList.add('highlight-target');
+					});
+				},
+				'dragEnd': function (event) {
+					if (event.item.targets) {
+						event.item.targets.forEach(function (e, i) {
+							e.classList.remove('highlight-target');
+						});
+					}
+				},
+				'dragAdd': function (event) {
+					/*
+					console.log('drag add', event);
+					console.log('target list', event.to);
+					console.log('source list', event.from);
+					console.log('old index', event.oldIndex);
+					console.log('new index', event.newIndex);
+					*/
+
+					const self = this;
+					const container = event.to;
+					const source = event.from;
+
+					const changeEvent = new CustomEvent('inventoryChange');
+					self.inventoryEl.dispatchEvent(changeEvent);
+				},
+				'unequip': function (event, item, container) {
+
+					this.lootboxItems.push(item);
+					
+					// get the array index of the clicked item
+					const index = container.items.findIndex(function (element) {
+						return element.id === item.id;
+					});
+					// remove the item from the container
+					container.items.splice(index, 1);
+
+					const changeEvent = new CustomEvent('inventoryChange');
+					this.inventoryEl.dispatchEvent(changeEvent);
+				}
 			},
 			'mounted': function () {
-				const self = this;
 				this.containerEl = this.$el;
 				this.lootboxEl = this.$el.querySelector('#lootbox');
 				this.inventoryEl = this.$el.querySelector('#inventory');
 				this.inventorySlots = Array.from(this.inventoryEl.querySelectorAll('.slot'));
-
-				const dragContainers = this.inventorySlots.concat([this.lootboxEl]);
-
-				this.drake = dragula({
-					'containers': dragContainers,
-					'revertOnSpill': true,
-					'accepts': function (el, target, source, sibling) {
-						const sourceType = el.getAttribute('data-type');
-						const targetType = target.getAttribute('data-accept');
-
-						const targetLimit = target.getAttribute('data-limit');
-						const targetOccupied = target.querySelectorAll('.item:not(.gu-transit)');
-
-						if (targetLimit > targetOccupied.length) {
-							if (targetType.toLowerCase() == 'all') {
-								// accept all types
-								return true;
-							} else {
-								// check type requirement
-								return sourceType == targetType;
-							}
-						} else {
-							// spot is full
-							return false;
-						}
-					}
-				});
-
-				this.drake.on('over', function (el, container, source) {
-					container.classList.add('highlight-drop');
-				});
-
-				this.drake.on('out', function (el, container, source) {
-					container.classList.remove('highlight-drop');
-				});
-
-				this.drake.on('drag', function (el, source) {
-					if (!el.targets) {
-						const sourceType = el.getAttribute('data-type');
-						el.targets = self.inventoryEl.querySelectorAll('div[data-accept="'+sourceType+'"]:not(.full)');
-					}
-
-					el.targets.forEach(function (e, i) {
-						e.classList.add('highlight-target');
-					});
-				});
-
-				this.drake.on('dragend', function (el, container, source) {
-					if (el.targets) {
-						el.targets.forEach(function (e, i) {
-							e.classList.remove('highlight-target');
-						});
-					}
-				});
-
-				this.drake.on('drop', function (el, container, source) {
-
-					let isInventory = false;
-					
-					// messy matching
-					if (container.getAttribute('id').startsWith('inv') && self.inventoryEl.getAttribute('id').startsWith('inv')) {
-						isInventory = true;
-					}
-
-					const occupancy = container.querySelectorAll('.item');
-					if (container.getAttribute('data-limit') == occupancy.length) {
-						container.classList.add('full');
-					}
-
-					if (source.querySelectorAll('*').length == 0) {
-						console.log('container is now empty again');
-						source.classList.remove('full');
-					}
-
-					// click removal of equipped items
-					if (isInventory) {
-						el.addEventListener('click', function (event) {
-
-							const slot = this.closest('.slot');
-
-							// remove the item from the inventory
-							self.lootboxEl.appendChild(this);
-
-							// update slot full status
-							if (slot) {
-								const slotOccupancy = slot.querySelectorAll('.item').length;
-								if (slotOccupancy < parseInt(slot.getAttribute('data-limit'))) {
-									slot.classList.remove('full');
-								}
-							}
-
-							const changeEvent = new CustomEvent('inventoryChange');
-							self.inventoryEl.dispatchEvent(changeEvent);
-
-							console.log('unequipped item');
-						});
-					}
-
-					const changeEvent = new CustomEvent('inventoryChange');
-					self.inventoryEl.dispatchEvent(changeEvent);
-
-					console.log('dropped item', el);
-				});
 			}
 		})
 	}
@@ -178,15 +225,6 @@ game.init = function () {
 		'charisma': 5,
 		'dexterity': 7
 	});
-
-	// generate 7 items, as a demo
-	let items = [];
-	for (var i = 0; i < 7; i++) {
-
-		let item = new ITEM();
-		item.rerollStats();
-		// console.log(item);
-	}
 
 	game.RANDOM = new RANDOM();
 	game.TITLES = new TITLES();
@@ -219,7 +257,6 @@ game.init = function () {
 		game.character.stats.maxHealth += 2;
 		game.character.stats.strength += 3;
 	});
-
 
 	let speech1 = new BUBBLES('#bubbles', [
 		'One beautiful spring day during the 2020 pandemic, a very hairy man decided to abandon his quest to find an even younger, less pregnant girlfriend and decided to collaborate with the current, old, boring one to write an exciting adventure for his son Cedar, also known as his daughter Sapphire.',

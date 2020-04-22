@@ -34,25 +34,54 @@
 	</dl>
 
 	<section id="inventory-container" v-bind:class="(!show) ? 'hidden' : 'open'">
-		<div id="lootbox" data-accept="all" data-limit="12">
-			<div class="item" data-type="helmet"><h2>Ancient Mariner's Headdress</h2></div>
-			<div class="item" data-type="helmet"><h2>Wolf's Head</h2></div>
-			<div class="item" data-type="pants"><h2>Spectre's Hotpants</h2></div>
+		<draggable id="lootbox" data-accept="all" data-limit="12" v-model="lootboxItems" group="inventory" @start="dragStart" @end="dragEnd" @add="dragAdd">
+			<div v-for="item in lootboxItems" :key="item.name" class="item" :data-type="item.type">{{ item.name }}</div>
+			<!--<div class="item" data-type="head"><h2>Ancient Mariner's Headdress</h2></div>
+			<div class="item" data-type="head"><h2>Wolf's Head</h2></div>
+			<div class="item" data-type="legs"><h2>Spectre's Hotpants</h2></div>
 			<div class="item" data-type="body"><h2>Soiled cloth</h2></div>
-			<div class="item" data-type="hand"><h2>Spiked Club</h2></div>
-		</div>
+			<div class="item" data-type="hand"><h2>Spiked Club</h2></div>-->
+		</draggable>
 
 		<div id="inventory">
-			<div class="slot" id="inv-hand-right" data-accept="hand" data-limit="1"></div>
-			<div class="slot" id="inv-hand-left" data-accept="hand" data-limit="1"></div>
 
-			<div class="slot" id="inv-head" data-accept="helmet" data-limit="1"></div>
+			<!--<inventory-slot v-bind:items="inventoryItems.handRight"></inventory-slot>-->
+
+			<draggable class="slot" id="inv-hand-right" data-accept="hand" data-limit="1" v-model="inventoryItems.handRight.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.handRight)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
+				<div v-for="item in inventoryItems.handRight.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.handRight)">{{ item.name }}</div>
+			</draggable>
+			<draggable class="slot" id="inv-hand-left" data-accept="hand" data-limit="1" v-model="inventoryItems.handLeft.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.handLeft)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
+				<div v-for="item in inventoryItems.handLeft.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.handLeft)">{{ item.name }}</div>
+			</draggable>
+			<!--<div class="slot" id="inv-hand-right" data-accept="hand" data-limit="1"></div>
+			<div class="slot" id="inv-hand-left" data-accept="hand" data-limit="1"></div>-->
+
+			<draggable class="slot" id="inv-head" data-accept="head" data-limit="1" v-model="inventoryItems.head.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.head)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
+				<div v-for="item in inventoryItems.head.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.head)">{{ item.name }}</div>
+			</draggable>
+			<draggable class="slot" id="inv-body" data-accept="body" data-limit="1" v-model="inventoryItems.body.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.body)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
+				<div v-for="item in inventoryItems.body.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.body)">{{ item.name }}</div>
+			</draggable>
+			<draggable class="slot" id="inv-legs" data-accept="legs" data-limit="1" v-model="inventoryItems.legs.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.legs)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
+				<div v-for="item in inventoryItems.legs.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.legs)">{{ item.name }}</div>
+			</draggable>
+			<!--<div class="slot" id="inv-head" data-accept="head" data-limit="1"></div>
 			<div class="slot" id="inv-body" data-accept="body" data-limit="1"></div>
-			<div class="slot" id="inv-pants" data-accept="pants" data-limit="1"></div>
+			<div class="slot" id="inv-pants" data-accept="legs" data-limit="1"></div>
 			
 			<div class="slot" id="inv-accessory-right" data-accept="accessory" data-limit="1"></div>
 			<div class="slot" id="inv-accessory-left" data-accept="accessory" data-limit="1"></div>
-			<div class="slot" id="inv-accessory-neck" data-accept="bracelet" data-limit="1"></div>
+			<div class="slot" id="inv-accessory-neck" data-accept="bracelet" data-limit="1"></div>-->
+
+			<draggable class="slot" id="inv-accessory-right" data-accept="accessory" data-limit="1" v-model="inventoryItems.accessoryRight.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.accessoryRight)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
+				<div v-for="item in inventoryItems.accessoryRight.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.accessoryRight)">{{ item.name }}</div>
+			</draggable>
+			<draggable class="slot" id="inv-accessory-left" data-accept="accessory" data-limit="1" v-model="inventoryItems.accessoryLeft.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.accessoryLeft)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
+				<div v-for="item in inventoryItems.accessoryLeft.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.accessoryLeft)">{{ item.name }}</div>
+			</draggable>
+			<draggable class="slot" id="inv-accessory-neck" data-accept="bracelet" data-limit="1" v-model="inventoryItems.accessoryNeck.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.accessoryNeck)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
+				<div v-for="item in inventoryItems.accessoryNeck.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.accessoryNeck)">{{ item.name }}</div>
+			</draggable>
 		</div>
 
 	</section>

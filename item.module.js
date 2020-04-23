@@ -53,7 +53,7 @@ const ITEM = class {
 		this.name = titles.generateTitle();
 
 		for (const stat in this.attributes) {
-			let newValue = generator.weighted([0,1,2,3,4], [16,8,4,2,1]);
+			let newValue = generator.weighted([-4,-3,-2,-1,0,1,2,3,4], [0.5,1,2,4,16,8,4,2,1]);
 			// console.log('stat', stat, newValue);
 			this.attributes[stat] = newValue;
 		}

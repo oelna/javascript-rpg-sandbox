@@ -17,98 +17,30 @@
 </head>
 <body>
 	<h1>It works!</h1>
+	<div id="overlay">
+		<dl id="character-stats" class="">
+			<dt>Strength</dt><dd>{{ computedAttribute('strength') }}</dd>
+			<dt>Constitution</dt><dd>{{ computedAttribute('constitution') }}</dd>
+			<dt>Dexterity</dt><dd>{{ computedAttribute('dexterity') }}</dd>
+			<dt>Intelligence</dt><dd>{{ computedAttribute('intelligence') }}</dd>
+			<dt>Wisdom</dt><dd>{{ computedAttribute('wisdom') }}</dd>
+			<dt>Charisma</dt><dd>{{ computedAttribute('charisma') }}</dd>
+			<dt>Mana</dt><dd>{{ computedAttribute('maxMana') }}</dd>
+			<dt>Health</dt><dd>{{ computedAttribute('maxHealth') }}</dd>
+			<dt>Lightning Resistance</dt><dd>{{ computedAttribute('resLightning') }}</dd>
+			<dt>Fire Resistance</dt><dd>{{ computedAttribute('resFire') }}</dd>
+			<dt>Cold Resistance</dt><dd>{{ computedAttribute('resCold') }}</dd>
+			<dt>Poison Resistance</dt><dd>{{ computedAttribute('resPoison') }}</dd>
+		</dl>
 
-	<dl id="character-stats" class="">
-		<dt>Strength</dt><dd>{{ strength }}</dd>
-		<dt>Constitution</dt><dd>{{ constitution }}</dd>
-		<dt>Dexterity</dt><dd>{{ dexterity }}</dd>
-		<dt>Intelligence</dt><dd>{{ intelligence }}</dd>
-		<dt>Wisdom</dt><dd>{{ wisdom }}</dd>
-		<dt>Charisma</dt><dd>{{ charisma }}</dd>
-		<dt>Mana</dt><dd>{{ maxMana }}</dd>
-		<dt>Health</dt><dd>{{ maxHealth }}</dd>
-		<dt>Lightning Resistance</dt><dd>{{ resLightning }}</dd>
-		<dt>Fire Resistance</dt><dd>{{ resFire }}</dd>
-		<dt>Cold Resistance</dt><dd>{{ resCold }}</dd>
-		<dt>Poison Resistance</dt><dd>{{ resPoison }}</dd>
-	</dl>
+		<section id="inventory-container" v-bind:class="(!show) ? 'hidden' : 'open'">
+			<inventory-slot v-for="slot in lootboxItems" :key="slot.name" v-bind:slot-data="slot"></inventory-slot>
 
-	<section id="inventory-container" v-bind:class="(!show) ? 'hidden' : 'open'">
-		<draggable id="lootbox" data-accept="all" data-limit="12" v-model="lootboxItems" group="inventory" @start="dragStart" @end="dragEnd" @add="dragAdd">
-			<div v-for="item in lootboxItems" :key="item.name" class="item" :data-type="item.type">{{ item.name }}</div>
-			<!--<div class="item" data-type="head"><h2>Ancient Mariner's Headdress</h2></div>
-			<div class="item" data-type="head"><h2>Wolf's Head</h2></div>
-			<div class="item" data-type="legs"><h2>Spectre's Hotpants</h2></div>
-			<div class="item" data-type="body"><h2>Soiled cloth</h2></div>
-			<div class="item" data-type="hand"><h2>Spiked Club</h2></div>-->
-		</draggable>
-
-		<div id="inventory">
-
-			<!--<inventory-slot v-bind:items="inventoryItems.handRight"></inventory-slot>-->
-
-			<draggable class="slot" id="inv-hand-right" data-accept="hand" data-limit="1" v-model="inventoryItems.handRight.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.handRight)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
-				<div v-for="item in inventoryItems.handRight.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.handRight)">{{ item.name }}</div>
-			</draggable>
-			<draggable class="slot" id="inv-hand-left" data-accept="hand" data-limit="1" v-model="inventoryItems.handLeft.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.handLeft)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
-				<div v-for="item in inventoryItems.handLeft.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.handLeft)">{{ item.name }}</div>
-			</draggable>
-			<!--<div class="slot" id="inv-hand-right" data-accept="hand" data-limit="1"></div>
-			<div class="slot" id="inv-hand-left" data-accept="hand" data-limit="1"></div>-->
-
-			<draggable class="slot" id="inv-head" data-accept="head" data-limit="1" v-model="inventoryItems.head.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.head)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
-				<div v-for="item in inventoryItems.head.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.head)">{{ item.name }}</div>
-			</draggable>
-			<draggable class="slot" id="inv-body" data-accept="body" data-limit="1" v-model="inventoryItems.body.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.body)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
-				<div v-for="item in inventoryItems.body.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.body)">{{ item.name }}</div>
-			</draggable>
-			<draggable class="slot" id="inv-legs" data-accept="legs" data-limit="1" v-model="inventoryItems.legs.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.legs)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
-				<div v-for="item in inventoryItems.legs.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.legs)">{{ item.name }}</div>
-			</draggable>
-			<!--<div class="slot" id="inv-head" data-accept="head" data-limit="1"></div>
-			<div class="slot" id="inv-body" data-accept="body" data-limit="1"></div>
-			<div class="slot" id="inv-pants" data-accept="legs" data-limit="1"></div>
-			
-			<div class="slot" id="inv-accessory-right" data-accept="accessory" data-limit="1"></div>
-			<div class="slot" id="inv-accessory-left" data-accept="accessory" data-limit="1"></div>
-			<div class="slot" id="inv-accessory-neck" data-accept="bracelet" data-limit="1"></div>-->
-
-			<draggable class="slot" id="inv-accessory-right" data-accept="accessory" data-limit="1" v-model="inventoryItems.accessoryRight.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.accessoryRight)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
-				<div v-for="item in inventoryItems.accessoryRight.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.accessoryRight)">{{ item.name }}</div>
-			</draggable>
-			<draggable class="slot" id="inv-accessory-left" data-accept="accessory" data-limit="1" v-model="inventoryItems.accessoryLeft.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.accessoryLeft)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
-				<div v-for="item in inventoryItems.accessoryLeft.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.accessoryLeft)">{{ item.name }}</div>
-			</draggable>
-			<draggable class="slot" id="inv-accessory-neck" data-accept="bracelet" data-limit="1" v-model="inventoryItems.accessoryNeck.items" v-bind="inventorySlotOptions()" :class="(isFull(inventoryItems.accessoryNeck)) ? 'full' : ''" @start="dragStart" @end="dragEnd" @add="dragAdd">
-				<div v-for="item in inventoryItems.accessoryNeck.items" :key="item.name" class="item" :data-type="item.type" @click="unequip($event,item,inventoryItems.accessoryNeck)">{{ item.name }}</div>
-			</draggable>
-		</div>
-
-	</section>
-
-	<!--
-	<div id="inventory">
-		<div class="slot" id="inv-hand-right" data-accept="hand" data-limit="1"></div>
-		<div class="slot" id="inv-hand-left" data-accept="hand" data-limit="1"></div>
-
-		<div class="slot" id="inv-head" data-accept="helmet" data-limit="1"></div>
-		<div class="slot" id="inv-body" data-accept="body" data-limit="1"></div>
-		<div class="slot" id="inv-pants" data-accept="pants" data-limit="1"></div>
-		
-		<div class="slot" id="inv-accessory-right" data-accept="accessory" data-limit="1"></div>
-		<div class="slot" id="inv-accessory-left" data-accept="accessory" data-limit="1"></div>
-		<div class="slot" id="inv-accessory-neck" data-accept="bracelet" data-limit="1"></div>
+			<div id="inventory">
+				<inventory-slot v-for="slot in inventoryItems" :key="slot.name" v-bind:slot-data="slot"></inventory-slot>
+			</div>
+		</section>
 	</div>
-
-	<div id="lootbox" data-accept="all" data-limit="12">
-		<div class="item" data-type="helmet"><h2>Ancient Mariner's Headdress</h2></div>
-		<div class="item" data-type="helmet"><h2>Wolf's Head</h2></div>
-		<div class="item" data-type="pants"><h2>Spectre's Hotpants</h2></div>
-		<div class="item" data-type="body"><h2>Soiled cloth</h2></div>
-		<div class="item" data-type="hand"><h2>Spiked Club</h2></div>
-	</div>
-	-->
-
 	<p id="bubbles"></p>
 </body>
 </html>
